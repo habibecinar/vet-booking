@@ -1,4 +1,3 @@
-
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
@@ -8,6 +7,7 @@ import Home from './pages/Home';
 import Appointment from './pages/Appointment';
 import UserPanel from './pages/UserPanel';
 import AdminPanel from './pages/AdminPanel';
+import AppointmentsDashboard from './pages/AppointmentsDashboard';
 
 function App() {
   return (
@@ -20,6 +20,7 @@ function App() {
         <Link className="nav-link" to="/appointment">Book Appointment</Link>
         <Link className="nav-link" to="/panel">User Panel</Link>
         <Link className="nav-link" to="/admin">Admin Panel</Link>
+        <Link className="nav-link" to="/dashboard">Dashboard</Link>
         </div>
       </nav>
       <Routes>
@@ -28,6 +29,7 @@ function App() {
         <Route path="/appointment" element={<Appointment />} />
         <Route path="/panel" element={<UserPanel />} />
         <Route path="/admin" element={<AdminPanel />} />
+        <Route path="/dashboard" element={<AppointmentsDashboard />} />
         <Route path="/" element={<Home />} />
       </Routes>
     </Router>
