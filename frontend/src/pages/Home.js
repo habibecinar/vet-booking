@@ -3,12 +3,12 @@ import React from 'react';
 function Home() {
   return (
     <div className="container mt-5">
-      <h2>Veteriner Randevu Sistemi</h2>
-      <p>Hoşgeldiniz! Sisteme giriş yaparak randevu oluşturabilir, geçmişinizi görebilir ve evcil hayvanlarınızı yönetebilirsiniz.</p>
+      <h2>Veterinary Appointment System</h2>
+      <p>Welcome! Log in to book appointments, view your history, and manage your pets.</p>
       <ul>
-        <li>Randevu almak için giriş yapın.</li>
-        <li>Yeni kullanıcıysanız kayıt olun.</li>
-        <li>Veterinerler ve adminler için özel paneller yakında!</li>
+        <li>Log in to book an appointment.</li>
+        <li>If you are new, please register.</li>
+        <li>Special panels for vets and admins coming soon!</li>
       </ul>
     </div>
   );
