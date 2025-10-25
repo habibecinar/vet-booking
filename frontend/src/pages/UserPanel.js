@@ -8,6 +8,10 @@ function UserPanel() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
+    if (!token) {
+      setError('You must be logged in to view this page.');
+      return;
+    }
     // Fetch user info from token
     const userId = JSON.parse(atob(token.split('.')[1])).userId;
     // Fetch pets
