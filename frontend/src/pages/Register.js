@@ -25,6 +25,13 @@ function Register() {
     <div className="home-auth-card" style={{margin:'40px auto', maxWidth:400}}>
       <h2>Register</h2>
       <form onSubmit={handleSubmit}>
+        <div className="mb-2">
+          <label style={{fontWeight:500, marginRight:8}}>Kayıt Tipi:</label>
+          <select className="form-control" name="role" value={form.role} onChange={handleChange} style={{marginBottom:8}}>
+            <option value="owner">Kullanıcı</option>
+            <option value="vet">Veteriner Hekim</option>
+          </select>
+        </div>
         <input name="name" type="text" className="form-control mb-2" placeholder="Name" value={form.name} onChange={handleChange} required />
         <input name="email" type="email" className="form-control mb-2" placeholder="Email" value={form.email} onChange={handleChange} required />
         <input name="password" type="password" className="form-control mb-2" placeholder="Password" value={form.password} onChange={handleChange} required />

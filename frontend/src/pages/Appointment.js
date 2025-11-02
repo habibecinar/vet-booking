@@ -1,42 +1,92 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import './appointments.css';
 
-function Appointment() {
+function Appointments() {
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
-  const [vetId, setVetId] = useState('');
+  const [note, setNote] = useState('');
+  const [pets, setPets] = useState([]);
   const [petId, setPetId] = useState('');
-  const [success, setSuccess] = useState('');
-  const [error, setError] = useState('');
+  const [appointments, setAppointments] = useState([]);
+
+  useEffect(() => {
+    fetchPets();
+    fetchAppointments();
+  }, []);
+
+  const fetchPets = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const decoded = JSON.parse(atob(token.split('.')[1]));
+      const res = await axios.get(`/pets/owner/${decoded.userId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setPets(res.data);
+    } catch (err) {
+      setPets([]);
+    }
+  };
+
+  const fetchAppointments = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const decoded = JSON.parse(atob(token.split('.')[1]));
+      const res = await axios.get(`/api/appointments`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setAppointments(res.data);
+    } catch (err) {
+      setAppointments([]);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(''); setSuccess('');
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5001/appointments', { date, time, vetId, petId }, {
+      await axios.post('/appointments', { date, time, note, petId }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setSuccess('Appointment created successfully!');
+      setDate(''); setTime(''); setNote(''); setPetId('');
+      fetchAppointments();
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to create appointment');
+      alert('Failed to create appointment');
     }
   };
 
   return (
-    <div className="container mt-5" style={{maxWidth:400}}>
-      <h2>Book Appointment</h2>
+    <div className="page">
+      <h2>Randevu Al</h2>
       <form onSubmit={handleSubmit}>
-        <input type="date" className="form-control mb-2" value={date} onChange={e => setDate(e.target.value)} required />
-        <input type="time" className="form-control mb-2" value={time} onChange={e => setTime(e.target.value)} required />
-        <input type="text" className="form-control mb-2" placeholder="Veterinarian ID" value={vetId} onChange={e => setVetId(e.target.value)} required />
-        <input type="text" className="form-control mb-2" placeholder="Pet ID" value={petId} onChange={e => setPetId(e.target.value)} required />
-        <button className="btn btn-primary w-100" type="submit">Book</button>
-        {error && <div className="alert alert-danger mt-2">{error}</div>}
-        {success && <div className="alert alert-success mt-2">{success}</div>}
+        <label>Tarih:</label>
+        <input type="date" value={date} onChange={e => setDate(e.target.value)} required />
+
+        <label>Saat:</label>
+        <input type="time" value={time} onChange={e => setTime(e.target.value)} required />
+
+        <label>Evcil Hayvan:</label>
+        <select value={petId} onChange={e => setPetId(e.target.value)} required>
+          <option value="">Seçiniz</option>
+          {pets.map(p => <option key={p._id} value={p._id}>{p.name}</option>)}
+        </select>
+
+        <label>Not:</label>
+        <textarea value={note} onChange={e => setNote(e.target.value)} />
+
+        <button type="submit">Randevu Oluştur</button>
       </form>
+
+      <h3>Randevularım</h3>
+      <ul>
+        {appointments.map(a => (
+          <li key={a._id}>
+            {new Date(a.date).toLocaleDateString()} - {a.time} → <b>{a.status}</b>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
 
-export default Appointment;
+export default Appointments;

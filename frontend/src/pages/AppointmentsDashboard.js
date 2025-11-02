@@ -1,59 +1,68 @@
-import React from 'react';
-import Sidebar from '../components/Sidebar';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+
 
 function AppointmentsDashboard() {
+  const [appointments, setAppointments] = useState([]);
+  const [role, setRole] = useState("");
+  const [userId, setUserId] = useState("");
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    const decoded = JSON.parse(atob(token.split(".")[1]));
+    setRole(decoded.role);
+    setUserId(decoded.userId);
+
+    axios
+      .get('/api/appointments', { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => setAppointments(res.data))
+      .catch(() => setError("Failed to fetch appointments"));
+  }, []);
+
+  const handleStatus = async (id, status) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.put(
+        `http://localhost:5001/appointments/${id}/status`,
+        { status },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setAppointments((prev) =>
+        prev.map((a) => (a._id === id ? res.data : a))
+      );
+    } catch {
+      alert("Failed to update status");
+    }
+  };
+
   return (
     <div className="dashboard">
-      <Sidebar active="appointments" />
-      <div className="dashboard-content">
-        <div className="dashboard-header">
-          <h2>Appointments</h2>
-          <div>
-            <input type="text" placeholder="Search" style={{marginRight:12, padding:'8px 12px', borderRadius:8, border:'1px solid #e0e4ea'}} />
-            <button className="btn">+ Book an Appointment</button>
-            <span className="user-info" style={{marginLeft:24}}>
-              <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="user" style={{width:32, borderRadius:'50%', marginRight:8}} />
-              Jane Doe
-            </span>
-          </div>
-        </div>
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Time</th>
-              <th>Pet</th>
-              <th>Vet</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Oct 5, 2024</td>
-              <td>10:00 AM</td>
-              <td>Buddy</td>
-              <td>Dr. Smith</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>Oct 10, 2024</td>
-              <td>02:00 PM</td>
-              <td>Milo</td>
-              <td>Dr. Smith</td>
-              <td><span className="status-badge">Pending</span></td>
-            </tr>
-            <tr>
-              <td>Oct 12, 2024</td>
-              <td>11:00 AM</td>
-              <td>Max</td>
-              <td>Dr. Jones</td>
-              <td></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+<div className="dashboard-content">
+  <div className="dashboard-header">
+    <h2>{role === "vet" ? "Veterinarian Dashboard" : "My Dashboard"}</h2>
+  </div>
+
+  {error && <div className="alert alert-danger">{error}</div>}
+
+  <div className="cards-row">
+    {role === "owner" && (
+      <>
+        <div className="card">My Appointments: {appointments.length}</div>
+        <div className="card">Pending: {appointments.filter(a => a.status==="pending").length}</div>
+      </>
+    )}
+    {role === "vet" && (
+      <>
+        <div className="card">Today's Appointments: {appointments.length}</div>
+        <div className="card">Pending Approvals: {appointments.filter(a => a.status==="pending").length}</div>
+      </>
+    )}
+  </div>
+</div>
+</div>
   );
 }
-
 export default AppointmentsDashboard;
