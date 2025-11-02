@@ -28,12 +28,13 @@ function AppointmentsPage() {
     setError(''); setSuccess('');
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5001/appointments/${id}`, {
+      await axios.delete(`/appointments/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSuccess('Appointment cancelled!');
       setAppointments(prev => prev.filter(a => a._id !== id));
     } catch (err) {
+      console.log('Cancel error:', err);
       setError(err.response?.data?.error || 'Failed to cancel appointment');
     }
   };
@@ -42,12 +43,13 @@ function AppointmentsPage() {
     setError(''); setSuccess('');
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.put(`http://localhost:5001/appointments/${id}/status`, { status }, {
+      const res = await axios.put(`/appointments/${id}/status`, { status }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSuccess('Appointment updated!');
       setAppointments(prev => prev.map(a => a._id === id ? res.data : a));
     } catch (err) {
+      console.log('Status update error:', err);
       setError(err.response?.data?.error || 'Failed to update appointment');
     }
   };
@@ -105,10 +107,10 @@ function AppointmentsPage() {
         {filtered.map(a => (
           <div className="col-md-6 mb-4" key={a._id}>
             <div className="card">
-              <div className="card-body">
-                <h5 className="card-title">
-                  {a.petId?.name} 
-                  <span className={`badge bg-${statusColor(a.status)} ms-2`}>
+              <div className="card-body" style={{ pointerEvents: 'auto' }}>
+                <h5 className="card-title d-flex align-items-center flex-wrap gap-2">
+                  {a.petId?.name}
+                  <span className={`badge bg-${statusColor(a.status)}`} style={{ pointerEvents: 'none' }}>
                     {a.status.charAt(0).toUpperCase() + a.status.slice(1)}
                   </span>
                 </h5>
@@ -116,18 +118,19 @@ function AppointmentsPage() {
                 <p className="card-text">Date: {new Date(a.date).toLocaleString()}</p>
                 {a.notes && <p className="card-text">Notes: {a.notes}</p>}
 
-                {role === 'owner' && a.status === 'pending' && (
-                  <button className="btn btn-outline-danger btn-sm" onClick={() => handleCancel(a._id)}>
-                    Cancel
-                  </button>
-                )}
-
-                {role === 'vet' && a.status === 'pending' && (
-                  <>
-                    <button className="btn btn-success btn-sm me-2" onClick={() => handleStatus(a._id, 'approved')}>Approve</button>
-                    <button className="btn btn-danger btn-sm" onClick={() => handleStatus(a._id, 'rejected')}>Reject</button>
-                  </>
-                )}
+                <div className="d-flex flex-wrap gap-2 mt-2">
+                  {role === 'owner' && a.status === 'pending' && (
+                    <button className="btn btn-outline-danger btn-sm" style={{ cursor: 'pointer' }} onClick={() => handleCancel(a._id)}>
+                      Cancel
+                    </button>
+                  )}
+                  {role === 'vet' && a.status === 'pending' && (
+                    <>
+                      <button className="btn btn-success btn-sm me-2" style={{ cursor: 'pointer' }} onClick={() => handleStatus(a._id, 'approved')}>Approve</button>
+                      <button className="btn btn-danger btn-sm" style={{ cursor: 'pointer' }} onClick={() => handleStatus(a._id, 'rejected')}>Reject</button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           </div>

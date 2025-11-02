@@ -22,7 +22,7 @@ function Home() {
     maxFiles: 1
   });  return (
     <div className="home-main" style={{position: 'relative'}}>
-      <svg className="home-wave" viewBox="0 0 900 600" width="100%" height="auto" style={{position: 'absolute', top: 0, left: 0, zIndex: 1, pointerEvents: 'none'}}>
+      <svg className="home-wave" viewBox="0 0 900 600" width="100%" height="100%" style={{position: 'absolute', top: 0, left: 0, zIndex: 1, pointerEvents: 'none'}}>
         <path d="M448 600L449.5 566.7C451 533.3 454 466.7 480.3 400C506.7 333.3 556.3 266.7 543 200C529.7 133.3 453.3 66.7 415.2 33.3L377 0L900 0L900 33.3C900 66.7 900 133.3 900 200C900 266.7 900 333.3 900 400C900 466.7 900 533.3 900 566.7L900 600Z" fill="#1c3d58" strokeLinecap="round" strokeLinejoin="miter"></path>
       </svg>
       <div className="home-wave-blob-wrapper" style={{position: 'absolute', left: 20, bottom: 0, zIndex: 2, width: '420px', height: '320px', display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none'}}>
