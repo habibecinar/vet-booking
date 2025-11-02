@@ -1,0 +1,236 @@
+/* ===========================
+   Genel body ve container
+   =========================== */
+body {
+  background: #f7f8fa;
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+  color: #222;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+  padding: 32px 24px;
+  margin-top: 40px;
+}
+
+/* ===========================
+   Başlık ve alt başlıklar
+   =========================== */
+h2, h4 {
+  color: #2d6cdf;
+  font-weight: 600;
+  margin-bottom: 18px;
+}
+
+h2 {
+  font-size: 2rem;
+}
+
+/* ===========================
+   Form elemanları
+   =========================== */
+form input, form select {
+  border-radius: 8px;
+  border: 1px solid #e0e4ea;
+  padding: 10px 12px;
+  font-size: 1rem;
+  margin-bottom: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+form button {
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 10px 0;
+  margin-top: 8px;
+  background: linear-gradient(90deg, #2d6cdf 60%, #5fa8e6 100%);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+form button:hover {
+  background: linear-gradient(90deg, #5fa8e6 60%, #2d6cdf 100%);
+}
+
+/* ===========================
+   Alert mesajları
+   =========================== */
+.alert {
+  border-radius: 8px;
+  font-size: 0.95rem;
+  padding: 10px 16px;
+  margin-top: 12px;
+}
+
+/* Başarı, hata, uyarı renkleri */
+.alert-success {
+  background: #e6f4ea;
+  color: #2e7d32;
+}
+
+.alert-danger {
+  background: #fdecea;
+  color: #c62828;
+}
+
+/* ===========================
+   Dashboard ve Sidebar
+   =========================== */
+.dashboard {
+  display: flex;
+  min-height: 90vh;
+  background: #f7f8fa;
+}
+
+.sidebar {
+  width: 260px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+  padding: 32px 0 0 0;
+  margin: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.sidebar .logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #2d6cdf;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 32px;
+  font-size: 1.05rem;
+  color: #222;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.menu-item.active {
+  background: #eaf2ff;
+  color: #2d6cdf;
+  font-weight: 600;
+}
+
+.menu-item:hover {
+  background: #f0f6ff;
+  color: #2d6cdf;
+}
+
+.dashboard-content {
+  flex: 1;
+  margin: 24px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+  padding: 32px;
+}
+
+/* ===========================
+   Randevu kartları
+   =========================== */
+.card {
+  border-radius: 16px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+  color: #2d6cdf;
+}
+
+.card-text {
+  margin-bottom: 8px;
+  color: #555;
+}
+
+/* Badge renkleri */
+.badge {
+  font-size: 0.85rem;
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.badge-pending { background: #ffc107; color: #fff; }
+.badge-approved { background: #4caf50; color: #fff; }
+.badge-rejected { background: #f44336; color: #fff; }
+
+/* ===========================
+   Butonlar
+   =========================== */
+.btn {
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 8px 12px;
+  transition: background 0.2s, color 0.2s;
+  cursor: pointer;
+}
+
+.btn-outline-danger {
+  background: #fff;
+  color: #f44336;
+  border: 2px solid #f44336;
+}
+
+.btn-outline-danger:hover {
+  background: #f44336;
+  color: #fff;
+}
+
+.btn-success {
+  background: #4caf50;
+  color: #fff;
+}
+
+.btn-success:hover {
+  background: #45a049;
+}
+
+.btn-danger {
+  background: #f44336;
+  color: #fff;
+}
+
+.btn-danger:hover {
+  background: #d32f2f;
+}
+
+/* ===========================
+   Arama input
+   =========================== */
+input.form-control {
+  border-radius: 8px;
+  border: 1px solid #e0e4ea;
+  padding: 10px 12px;
+  font-size: 1rem;
+  margin-bottom: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}

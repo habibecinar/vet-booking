@@ -1,0 +1,128 @@
+/* Blob içindeki login/register butonları için özel stiller */
+.home-auth-blob button {
+  background: #fff;
+  color: #1c3d58;
+  border: 2px solid #1c3d58;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 1.08rem;
+  box-shadow: 0 2px 12px 0 rgba(28,61,88,0.10);
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  margin-bottom: 0;
+  width: 180px;
+  padding: 12px 0;
+  cursor: pointer;
+}
+.home-auth-blob button.btn-primary {
+  background: #1c3d58;
+  color: #fff;
+  border: 2px solid #1c3d58;
+}
+.home-auth-blob button.btn-primary:hover {
+  background: #17405e;
+  color: #fff;
+  box-shadow: 0 4px 18px 0 rgba(28,61,88,0.18);
+}
+.home-auth-blob button.btn-outline-primary {
+  background: #fff;
+  color: #1c3d58;
+  border: 2px solid #1c3d58;
+}
+.home-auth-blob button.btn-outline-primary:hover {
+  background: #eaf3fa;
+  color: #17405e;
+  box-shadow: 0 4px 18px 0 rgba(28,61,88,0.13);
+}
+.home-auth-blob {
+  z-index: 3;
+}
+.home-wave-blob-wrapper {
+  z-index: 2;
+}
+.home-main {
+  min-height: 100vh;
+  background: linear-gradient(120deg, #e0f7fa 0%, #fff 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.home-hero {
+  display: flex;
+  align-items: center;
+  margin-top: 40px;
+  margin-bottom: 30px;
+  gap: 32px;
+}
+.home-hero-img {
+  width: 320px;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 24px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+}
+.home-hero-content {
+  max-width: 400px;
+}
+.home-hero-content h1 {
+  font-size: 2.8rem;
+  color: #1976d2;
+  margin-bottom: 12px;
+}
+.home-hero-content p {
+  font-size: 1.2rem;
+  color: #333;
+}
+.home-auth {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+.home-auth-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  padding: 32px 24px;
+  min-width: 320px;
+  text-align: center;
+}
+.home-auth-card h2 {
+  font-size: 1.4rem;
+  color: #1976d2;
+  margin-bottom: 10px;
+}
+.home-pet-img {
+  width: 180px;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 50%;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+  margin-left: 32px;
+  background: #fff;
+  border: 4px solid #e0f7fa;
+}
+.home-photo-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-left: 32px;
+}
+.dropzone {
+  border: 2px dashed #1976d2;
+  border-radius: 16px;
+  background: #f5fafd;
+  color: #1976d2;
+  padding: 24px 16px;
+  text-align: center;
+  cursor: pointer;
+  min-width: 220px;
+  min-height: 80px;
+  transition: border-color 0.3s;
+}
+.dropzone:active, .dropzone:focus {
+  border-color: #1565c0;
+}
+.preview-img img {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+  border: 2px solid #e0f7fa;
+}

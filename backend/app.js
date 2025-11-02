@@ -2,7 +2,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
-
+const cors = require('cors');
+app.use(cors());
 app.use(express.json());
 
 // Route'ları ekle
@@ -11,9 +12,9 @@ app.use('/auth', authRoutes);
 const petRoutes = require('./routes/pets');
 app.use('/pets', petRoutes);
 const appointmentRoutes = require('./routes/appointments');
-app.use('/appointments', appointmentRoutes);
+app.use('/api/appointments', appointmentRoutes);
 const vetRoutes = require('./routes/vets');
-app.use('/vets', vetRoutes);
+app.use('/api/vets', vetRoutes);
 
 // MongoDB bağlantısı
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/vet-booking';
