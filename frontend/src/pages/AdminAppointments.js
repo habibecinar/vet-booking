@@ -59,4 +59,5 @@ function AdminAppointments() {
   );
 }
 
+
 export default AdminAppointments;
