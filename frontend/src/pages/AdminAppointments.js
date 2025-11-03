@@ -41,15 +41,17 @@ function AdminAppointments() {
               <td>{a.time}</td>
               <td>{a.status}</td>
               <td>
-                {a.status === 'pending' && (
-                  <>
-                    <button onClick={() => updateStatus(a._id, 'approved')}>Onayla</button>
-                    <button onClick={() => updateStatus(a._id, 'cancelled')}>Reddet</button>
-                  </>
-                )}
-                {a.status === 'approved' && (
-                  <button onClick={() => updateStatus(a._id, 'completed')}>Tamamla</button>
-                )}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {a.status === 'pending' && (
+                    <>
+                      <button style={{ cursor: 'pointer' }} onClick={() => updateStatus(a._id, 'approved')}>Onayla</button>
+                      <button style={{ cursor: 'pointer' }} onClick={() => updateStatus(a._id, 'cancelled')}>Reddet</button>
+                    </>
+                  )}
+                  {a.status === 'approved' && (
+                    <button style={{ cursor: 'pointer' }} onClick={() => updateStatus(a._id, 'completed')}>Tamamla</button>
+                  )}
+                </div>
               </td>
             </tr>
           ))}
