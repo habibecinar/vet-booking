@@ -1,43 +1,96 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-toastify';
+import './Auth.css';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [role, setRole] = useState('owner');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setLoading(true);
     try {
-      const res = await axios.post('http://localhost:5001/auth/login', { email, password, role });
-      localStorage.setItem('token', res.data.token);
-      alert('Giriş başarılı!');
+      const res = await axios.post('http://localhost:5001/auth/login', { email, password });
+      login(res.data.token, res.data.user);
+      toast.success(`🎉 Welcome back, ${res.data.user.name}!`);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.error || 'Giriş başarısız');
+      toast.error(err.response?.data?.error || 'Login failed');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="home-auth-card" style={{margin:'40px auto', maxWidth:400}}>
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-2">
-          <label style={{fontWeight:500, marginRight:8}}>Giriş Tipi:</label>
-          <select className="form-control" value={role} onChange={e => setRole(e.target.value)} style={{marginBottom:8}}>
-            <option value="owner">Kullanıcı</option>
-            <option value="vet">Veteriner Hekim</option>
-          </select>
+    <div className="auth-container">
+      <div className="auth-card">
+        <div className="auth-card-header">
+          <div className="icon">🐾</div>
+          <h2>Welcome Back</h2>
+          <p>Login to your veterinary appointment system</p>
         </div>
-        <input type="email" className="form-control mb-2" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
-        <input type="password" className="form-control mb-2" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required />
-        <button className="btn btn-primary w-100" type="submit">Login</button>
-        {error && <div className="alert alert-danger mt-2">{error}</div>}
-      </form>
+
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>
+              <span className="icon">📧</span>
+              Email
+            </label>
+            <input 
+              type="email" 
+              className="form-input"
+              placeholder="example@email.com" 
+              value={email} 
+              onChange={e => setEmail(e.target.value)} 
+              required 
+              autoComplete="email"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>
+              <span className="icon">🔒</span>
+              Password
+            </label>
+            <input 
+              type="password" 
+              className="form-input"
+              placeholder="••••••••" 
+              value={password} 
+              onChange={e => setPassword(e.target.value)} 
+              required 
+              autoComplete="current-password"
+            />
+          </div>
+
+          <button 
+            className="auth-button" 
+            type="submit" 
+            disabled={loading}
+          >
+            {loading ? (
+              <div className="auth-button-loading">
+                <div className="spinner"></div>
+                <span>Logging in...</span>
+              </div>
+            ) : (
+              'Login'
+            )}
+          </button>
+        </form>
+
+        <div className="auth-footer">
+          <p>
+            Don't have an account? <Link to="/register">Register</Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

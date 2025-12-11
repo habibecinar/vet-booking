@@ -1,4 +1,5 @@
 // Backend giriş noktası
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
@@ -10,7 +11,7 @@ app.use(express.json());
 const authRoutes = require('./routes/auth');
 app.use('/auth', authRoutes);
 const petRoutes = require('./routes/pets');
-app.use('/pets', petRoutes);
+app.use('/api/pets', petRoutes); // /api prefix eklendi
 const appointmentRoutes = require('./routes/appointments');
 app.use('/api/appointments', appointmentRoutes);
 const vetRoutes = require('./routes/vets');

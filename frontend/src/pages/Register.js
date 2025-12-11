@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import { toast } from 'react-toastify';
+import './Auth.css';
 
 function Register() {
   const [form, setForm] = useState({ name: '', email: '', password: '', role: 'owner' });
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = e => {
@@ -14,36 +15,138 @@ function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(''); setSuccess('');
+    
+    // Password validation
+    if (form.password.length < 6) {
+      toast.warning('⚠️ Password must be at least 6 characters');
+      return;
+    }
+    
+    setLoading(true);
     try {
       await axios.post('http://localhost:5001/auth/register', form);
-      setSuccess('Registration successful!');
+      toast.success('🎉 Registration successful! Redirecting to login...');
       setTimeout(() => {
         navigate('/login');
-      }, 1000);
+      }, 1500);
     } catch (err) {
-      setError(err.response?.data?.error || 'Registration failed');
+      toast.error(err.response?.data?.error || 'Registration failed');
+    } finally {
+      setLoading(false);
     }
   };
 
+  const getRoleIcon = (role) => {
+    return role === 'owner' ? '👤' : '👨‍⚕️';
+  };
+
+  const getRoleText = (role) => {
+    return role === 'owner' ? 'Pet Owner' : 'Veterinarian';
+  };
+
   return (
-    <div className="home-auth-card" style={{margin:'40px auto', maxWidth:400}}>
-      <h2>Register</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-2">
-          <label style={{fontWeight:500, marginRight:8}}>Kayıt Tipi:</label>
-          <select className="form-control" name="role" value={form.role} onChange={handleChange} style={{marginBottom:8}}>
-            <option value="owner">Kullanıcı</option>
-            <option value="vet">Veteriner Hekim</option>
-          </select>
+    <div className="auth-container">
+      <div className="auth-card">
+        <div className="auth-card-header">
+          <div className="icon">🐾</div>
+          <h2>Create Account</h2>
+          <p>Join our veterinary appointment system</p>
         </div>
-        <input name="name" type="text" className="form-control mb-2" placeholder="Name" value={form.name} onChange={handleChange} required />
-        <input name="email" type="email" className="form-control mb-2" placeholder="Email" value={form.email} onChange={handleChange} required />
-        <input name="password" type="password" className="form-control mb-2" placeholder="Password" value={form.password} onChange={handleChange} required />
-        <button className="btn btn-outline-primary w-100" type="submit">Register</button>
-        {error && <div className="alert alert-danger mt-2">{error}</div>}
-        {success && <div className="alert alert-success mt-2">{success}</div>}
-      </form>
+
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>
+              <span className="icon">🎭</span>
+              Account Type
+            </label>
+            <select 
+              className="form-select" 
+              name="role" 
+              value={form.role} 
+              onChange={handleChange}
+            >
+              <option value="owner">👤 Pet Owner</option>
+              <option value="vet">👨‍⚕️ Veterinarian</option>
+            </select>
+            <div className="role-badge">
+              {getRoleIcon(form.role)} Registering as {getRoleText(form.role)}
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label>
+              <span className="icon">👤</span>
+              Full Name
+            </label>
+            <input 
+              name="name" 
+              type="text" 
+              className="form-input"
+              placeholder="Your full name" 
+              value={form.name} 
+              onChange={handleChange} 
+              required 
+              autoComplete="name"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>
+              <span className="icon">📧</span>
+              Email
+            </label>
+            <input 
+              name="email" 
+              type="email" 
+              className="form-input"
+              placeholder="example@email.com" 
+              value={form.email} 
+              onChange={handleChange} 
+              required 
+              autoComplete="email"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>
+              <span className="icon">🔒</span>
+              Password
+            </label>
+            <input 
+              name="password" 
+              type="password" 
+              className="form-input"
+              placeholder="At least 6 characters" 
+              value={form.password} 
+              onChange={handleChange} 
+              required 
+              autoComplete="new-password"
+              minLength="6"
+            />
+          </div>
+
+          <button 
+            className="auth-button" 
+            type="submit"
+            disabled={loading}
+          >
+            {loading ? (
+              <div className="auth-button-loading">
+                <div className="spinner"></div>
+                <span>Registering...</span>
+              </div>
+            ) : (
+              'Register'
+            )}
+          </button>
+        </form>
+
+        <div className="auth-footer">
+          <p>
+            Already have an account? <Link to="/login">Login</Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

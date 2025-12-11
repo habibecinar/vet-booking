@@ -1,44 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 function PetsPage() {
   const [pets, setPets] = useState([]);
-  const [form, setForm] = useState({ name: '', species: '', age: '', notes: '', photo: '' });
-  const [role, setRole] = useState('owner');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [form, setForm] = useState({ name: '', species: '', age: '' });
+  const [editId, setEditId] = useState(null);
+  const [editForm, setEditForm] = useState({ name: '', species: '', age: '' });
 
   useEffect(() => {
-    // Token'dan rolü ve userId'yi al
-    try {
-      const token = localStorage.getItem('token');
-      if (token) {
-        const decoded = JSON.parse(atob(token.split('.')[1]));
-        setRole(decoded.role);
-        // Owner ise kendi petlerini, vet ise randevu aldığı petleri çek
-        if (decoded.role === 'owner') {
-          axios.get(`/pets/owner/${decoded.userId}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          })
-            .then(res => setPets(res.data))
-            .catch(() => setError('Failed to fetch pets'));
-        } else if (decoded.role === 'vet') {
-          axios.get('/appointments', {
-            headers: { Authorization: `Bearer ${token}` }
-          })
-            .then(res => {
-              // Vet'in randevu aldığı petleri bul
-              const myPets = res.data
-                .filter(a => a.vetId._id === decoded.userId)
-                .map(a => a.petId);
-              setPets(myPets);
-            })
-            .catch(() => setError('Failed to fetch pets'));
-        }
-      }
-    } catch {}
+    fetchPets();
   }, []);
+
+  const fetchPets = async () => {
+    try {
+      const res = await axios.get('/api/pets');
+      setPets(res.data);
+    } catch (err) {
+      console.error('Pet loading error:', err.response || err);
+      const errorMsg = err.response?.data?.error || err.message || 'Failed to load pets';
+      toast.error(errorMsg);
+    }
+  };
 
   const handleChange = e => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -46,118 +29,226 @@ function PetsPage() {
 
   const handleAddPet = async (e) => {
     e.preventDefault();
-    setError(''); setSuccess('');
+    
+    // Validation
+    if (!form.name || !form.species || !form.age) {
+      toast.warning('Please fill all fields');
+      return;
+    }
+    
+    if (form.age < 0 || form.age > 50) {
+      toast.error('Age must be between 0-50');
+      return;
+    }
+    
     try {
-      const token = localStorage.getItem('token');
-      const decoded = JSON.parse(atob(token.split('.')[1]));
-      const res = await axios.post('/pets', { ...form, ownerId: decoded.userId }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setSuccess('Pet added!');
+      const res = await axios.post('/api/pets', form);
+      toast.success('🐾 Pet added successfully!');
       setPets(prev => [...prev, res.data]);
-      setForm({ name: '', species: '', age: '', notes: '', photo: '' });
+      setForm({ name: '', species: '', age: '' });
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to add pet');
+      toast.error(err.response?.data?.error || 'Failed to add pet');
     }
   };
 
-  // Pet silme
   const handleDeletePet = async (petId) => {
     if (!window.confirm('Are you sure you want to delete this pet?')) return;
-    setError(''); setSuccess('');
+    
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`/pets/${petId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setSuccess('Pet deleted!');
+      await axios.delete(`/api/pets/${petId}`);
+      toast.success('Pet deleted successfully!');
       setPets(prev => prev.filter(p => p._id !== petId));
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to delete pet');
+      toast.error(err.response?.data?.error || 'Failed to delete pet');
     }
   };
-
-  // Pet düzenleme (modal veya inline form ile yapılabilir, burada örnek inline):
-  const [editId, setEditId] = useState(null);
-  const [editForm, setEditForm] = useState({ name: '', species: '', age: '', notes: '' });
 
   const startEdit = (pet) => {
     setEditId(pet._id);
-    setEditForm({ name: pet.name, species: pet.species, age: pet.age, notes: pet.notes });
+    setEditForm({ name: pet.name, species: pet.species, age: pet.age });
   };
+
+  const cancelEdit = () => {
+    setEditId(null);
+    setEditForm({ name: '', species: '', age: '' });
+  };
+
   const handleEditChange = e => {
     setEditForm({ ...editForm, [e.target.name]: e.target.value });
   };
+
   const handleEditPet = async (e) => {
     e.preventDefault();
-    setError(''); setSuccess('');
+    
+    // Validation
+    if (editForm.age < 0 || editForm.age > 50) {
+      toast.error('Age must be between 0-50');
+      return;
+    }
+    
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.put(`/pets/${editId}`, editForm, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setSuccess('Pet updated!');
+      const res = await axios.put(`/api/pets/${editId}`, editForm);
+      toast.success('Pet updated successfully!');
       setPets(prev => prev.map(p => p._id === editId ? res.data : p));
       setEditId(null);
+      setEditForm({ name: '', species: '', age: '' });
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to update pet');
+      toast.error(err.response?.data?.error || 'Failed to update pet');
     }
   };
 
   return (
-    <div className="container mt-5">
-      <h2>Pets</h2>
-      {error && <div className="alert alert-danger">{error}</div>}
-      {success && <div className="alert alert-success">{success}</div>}
-      {role === 'owner' && (
-        <form onSubmit={handleAddPet} style={{maxWidth:400, marginBottom:24}}>
-          <input name="name" type="text" className="form-control mb-2" placeholder="Pet Name" value={form.name} onChange={handleChange} required />
-          <input name="species" type="text" className="form-control mb-2" placeholder="Species (e.g. Dog, Cat)" value={form.species} onChange={handleChange} required />
-          <input name="age" type="number" className="form-control mb-2" placeholder="Age" value={form.age} onChange={handleChange} required min="0" />
-          <input name="notes" type="text" className="form-control mb-2" placeholder="Notes" value={form.notes} onChange={handleChange} />
-          {/* Fotoğraf alanı eklenebilir */}
-          <button className="btn btn-primary w-100" type="submit">Add Pet</button>
-        </form>
-      )}
-      <div className="row mb-4">
-        <div className="col-12 d-flex flex-wrap gap-2">
-          <Link to="/appointments" className="btn btn-outline-secondary">My Appointments</Link>
-          <Link to="/vets" className="btn btn-outline-secondary">Find a Vet</Link>
-        </div>
-      </div>
-      <div className="row">
-        {pets.map((pet, i) => (
-          <div className="col-md-4 mb-4" key={pet._id || i}>
-            <div className="card" style={{minHeight:260}}>
-              <img src={pet.photo || '/images/default-pet.jpg'} alt={pet.name} className="card-img-top" style={{height:180, objectFit:'cover'}} />
-              <div className="card-body">
-                {role === 'owner' && editId === pet._id ? (
-                  <form onSubmit={handleEditPet}>
-                    <input name="name" className="form-control mb-1" value={editForm.name} onChange={handleEditChange} required />
-                    <input name="species" className="form-control mb-1" value={editForm.species} onChange={handleEditChange} required />
-                    <input name="age" type="number" className="form-control mb-1" value={editForm.age} onChange={handleEditChange} required min="0" />
-                    <input name="notes" className="form-control mb-1" value={editForm.notes} onChange={handleEditChange} />
-                    <button className="btn btn-success btn-sm me-2" type="submit">Save</button>
-                    <button className="btn btn-secondary btn-sm" type="button" onClick={() => setEditId(null)}>Cancel</button>
-                  </form>
-                ) : (
-                  <>
-                    <h5 className="card-title">{pet.name}</h5>
-                    <p className="card-text">{pet.species} - {pet.age} years</p>
-                    {pet.notes && <p className="card-text"><small>{pet.notes}</small></p>}
-                    {role === 'owner' && (
-                      <>
-                        <button className="btn btn-outline-primary btn-sm me-2" onClick={() => startEdit(pet)}>Edit</button>
-                        <button className="btn btn-outline-danger btn-sm" onClick={() => handleDeletePet(pet._id)}>Delete</button>
-                      </>
-                    )}
-                  </>
-                )}
-              </div>
+    <div className="page" style={{ maxWidth: 1000, margin: '0 auto', padding: 20 }}>
+      <h2>🐾 My Pets</h2>
+      
+      {/* Pet Add Form */}
+      <div style={{ 
+        background: '#f8f9fa', 
+        padding: 20, 
+        borderRadius: 8, 
+        marginBottom: 30 
+      }}>
+        <h3>Add New Pet</h3>
+        <form onSubmit={handleAddPet}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 15 }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: 5, fontWeight: 500 }}>Name:</label>
+              <input 
+                name="name" 
+                type="text" 
+                className="form-control" 
+                placeholder="e.g., Fluffy" 
+                value={form.name} 
+                onChange={handleChange} 
+                required 
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: 5, fontWeight: 500 }}>Species:</label>
+              <input 
+                name="species" 
+                type="text" 
+                className="form-control" 
+                placeholder="e.g., Cat, Dog" 
+                value={form.species} 
+                onChange={handleChange} 
+                required 
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: 5, fontWeight: 500 }}>Age:</label>
+              <input 
+                name="age" 
+                type="number" 
+                className="form-control" 
+                placeholder="e.g., 3" 
+                value={form.age} 
+                onChange={handleChange} 
+                min="0" 
+                max="50" 
+                required 
+              />
             </div>
           </div>
-        ))}
+          <button 
+            type="submit" 
+            className="btn btn-primary" 
+            style={{ marginTop: 15 }}
+          >
+            Add Pet
+          </button>
+        </form>
       </div>
+
+      {/* Pet List */}
+      <h3>Pet List ({pets.length})</h3>
+      {pets.length === 0 ? (
+        <p style={{ color: '#666', fontStyle: 'italic' }}>No pets added yet</p>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
+          {pets.map(pet => (
+            <div 
+              key={pet._id} 
+              style={{ 
+                border: '1px solid #ddd', 
+                borderRadius: 8, 
+                padding: 15, 
+                background: '#fff' 
+              }}
+            >
+              {editId === pet._id ? (
+                // Edit Mode
+                <form onSubmit={handleEditPet}>
+                  <input 
+                    name="name" 
+                    className="form-control mb-2" 
+                    value={editForm.name} 
+                    onChange={handleEditChange} 
+                    required 
+                  />
+                  <input 
+                    name="species" 
+                    className="form-control mb-2" 
+                    value={editForm.species} 
+                    onChange={handleEditChange} 
+                    required 
+                  />
+                  <input 
+                    name="age" 
+                    type="number" 
+                    className="form-control mb-2" 
+                    value={editForm.age} 
+                    onChange={handleEditChange} 
+                    min="0" 
+                    max="50" 
+                    required 
+                  />
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button type="submit" className="btn btn-success btn-sm" style={{ flex: 1 }}>
+                      Save
+                    </button>
+                    <button 
+                      type="button" 
+                      className="btn btn-secondary btn-sm" 
+                      onClick={cancelEdit}
+                      style={{ flex: 1 }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                // View Mode
+                <>
+                  <h4 style={{ margin: 0, marginBottom: 10 }}>🐾 {pet.name}</h4>
+                  <p style={{ margin: 0, color: '#666' }}>
+                    <strong>Species:</strong> {pet.species}
+                  </p>
+                  <p style={{ margin: 0, color: '#666', marginBottom: 15 }}>
+                    <strong>Age:</strong> {pet.age}
+                  </p>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button 
+                      className="btn btn-warning btn-sm" 
+                      onClick={() => startEdit(pet)}
+                      style={{ flex: 1 }}
+                    >
+                      Edit
+                    </button>
+                    <button 
+                      className="btn btn-danger btn-sm" 
+                      onClick={() => handleDeletePet(pet._id)}
+                      style={{ flex: 1 }}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

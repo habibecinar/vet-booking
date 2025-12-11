@@ -1,140 +1,277 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-
+import { toast } from 'react-toastify';
+import './AppointmentsPage.css';
 
 function AppointmentsPage() {
   const [appointments, setAppointments] = useState([]);
   const [role, setRole] = useState('owner');
-  const [userId, setUserId] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [filter, setFilter] = useState('');
   const [dateFilter, setDateFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-    const decoded = JSON.parse(atob(token.split('.')[1]));
-    setRole(decoded.role);
-    setUserId(decoded.userId);
-
-    axios.get('/api/appointments', { headers: { Authorization: `Bearer ${token}` } })
-      .then(res => setAppointments(res.data))
-      .catch(() => setError('Failed to fetch appointments'));
+    fetchAppointments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const fetchAppointments = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error('Please login');
+        return;
+      }
+      
+      const decoded = JSON.parse(atob(token.split('.')[1]));
+      setRole(decoded.role);
+
+      const res = await axios.get('/api/appointments');
+      setAppointments(res.data);
+      setLoading(false);
+    } catch (err) {
+      console.error('Failed to load appointments:', err.response || err);
+      const errorMsg = err.response?.data?.error || err.message || 'Failed to load appointments';
+      toast.error(errorMsg);
+      setLoading(false);
+    }
+  };
 
   const handleCancel = async (id) => {
     if (!window.confirm('Are you sure you want to cancel this appointment?')) return;
-    setError(''); setSuccess('');
+    
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`/appointments/${id}`, {
+      await axios.delete(`/api/appointments/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setSuccess('Appointment cancelled!');
+      toast.success('Appointment cancelled!');
       setAppointments(prev => prev.filter(a => a._id !== id));
     } catch (err) {
-      console.log('Cancel error:', err);
-      setError(err.response?.data?.error || 'Failed to cancel appointment');
+      console.error('Cancel error:', err);
+      toast.error(err.response?.data?.error || 'Failed to cancel appointment');
     }
   };
 
   const handleStatus = async (id, status) => {
-    setError(''); setSuccess('');
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.put(`/appointments/${id}/status`, { status }, {
+      const res = await axios.put(`/api/appointments/${id}/status`, { status }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setSuccess('Appointment updated!');
+      toast.success(`Appointment ${status === 'approved' ? 'approved' : 'rejected'}!`);
       setAppointments(prev => prev.map(a => a._id === id ? res.data : a));
     } catch (err) {
-      console.log('Status update error:', err);
-      setError(err.response?.data?.error || 'Failed to update appointment');
+      console.error('Status update error:', err);
+      toast.error(err.response?.data?.error || 'Failed to update status');
     }
   };
 
-
-
-  const statusColor = (status) => {
-    if (status === 'pending') return 'warning';
-    if (status === 'approved') return 'success';
-    if (status === 'rejected') return 'danger';
-    return 'secondary';
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'approved': return 'success';
+      case 'pending': return 'warning';
+      case 'rejected': return 'danger';
+      default: return 'secondary';
+    }
   };
 
-  // Filtrelenmiş randevular
+  const getStatusText = (status) => {
+    switch(status) {
+      case 'approved': return 'Approved';
+      case 'pending': return 'Pending';
+      case 'rejected': return 'Rejected';
+      default: return status;
+    }
+  };
+
+  // Filtering
   const filtered = appointments.filter(a => {
     const matchesText =
       a.petId?.name?.toLowerCase().includes(filter.toLowerCase()) ||
-      a.vetId?.name?.toLowerCase().includes(filter.toLowerCase()) ||
-      a.status?.toLowerCase().includes(filter.toLowerCase());
+      a.vetId?.name?.toLowerCase().includes(filter.toLowerCase());
+    
     let matchesDate = true;
     if (dateFilter) {
-      // a.date UTC ise, sadece yyyy-mm-dd kısmını karşılaştır
-      const apptDate = new Date(a.date);
-      const apptDateStr = apptDate.toISOString().slice(0, 10);
-      matchesDate = apptDateStr === dateFilter;
+      const apptDate = new Date(a.date).toISOString().slice(0, 10);
+      matchesDate = apptDate === dateFilter;
     }
-    return matchesText && matchesDate;
+
+    let matchesStatus = true;
+    if (statusFilter !== 'all') {
+      matchesStatus = a.status === statusFilter;
+    }
+
+    return matchesText && matchesDate && matchesStatus;
   });
 
+  if (loading) {
+    return (
+      <div className="appointments-loading">
+        <div className="spinner"></div>
+        <p>Loading appointments...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="container mt-5">
-      <h2>Appointments</h2>
-      {error && <div className="alert alert-danger">{error}</div>}
-      {success && <div className="alert alert-success">{success}</div>}
-      <div className="row mb-2">
-        <div className="col-md-4 mb-2">
-          <input
-            type="date"
-            className="form-control"
-            value={dateFilter}
-            onChange={e => setDateFilter(e.target.value)}
-            placeholder="Tarih seç"
-          />
+    <div className="appointments-page">
+      {/* Header */}
+      <div className="appointments-header">
+        <div className="header-content">
+          <div className="title-section">
+            <h1>
+              <span className="title-icon">📅</span>
+              My Appointments
+            </h1>
+            <p className="subtitle">Manage all your appointments here</p>
+          </div>
+          <div className="stats-mini">
+            <div className="mini-stat">
+              <span className="mini-stat-value">{appointments.length}</span>
+              <span className="mini-stat-label">Total</span>
+            </div>
+            <div className="mini-stat">
+              <span className="mini-stat-value">
+                {appointments.filter(a => a.status === 'pending').length}
+              </span>
+              <span className="mini-stat-label">Pending</span>
+            </div>
+          </div>
         </div>
-        <div className="col-md-8">
+      </div>
+
+      {/* Filters */}
+      <div className="filters-section">
+        <div className="filter-group">
+          <label>🔍 Search</label>
           <input
-            className="form-control"
-            placeholder="Search by pet, vet or status"
+            type="text"
+            className="filter-input"
+            placeholder="Pet or vet name..."
             value={filter}
             onChange={e => setFilter(e.target.value)}
           />
         </div>
+        <div className="filter-group">
+          <label>📅 Date</label>
+          <input
+            type="date"
+            className="filter-input"
+            value={dateFilter}
+            onChange={e => setDateFilter(e.target.value)}
+          />
+        </div>
+        <div className="filter-group">
+          <label>🏷️ Status</label>
+          <select 
+            className="filter-input"
+            value={statusFilter}
+            onChange={e => setStatusFilter(e.target.value)}
+          >
+            <option value="all">All</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
       </div>
-      <div className="row">
-        {filtered.map(a => (
-          <div className="col-md-6 mb-4" key={a._id}>
-            <div className="card">
-              <div className="card-body" style={{ pointerEvents: 'auto' }}>
-                <h5 className="card-title d-flex align-items-center flex-wrap gap-2">
-                  {a.petId?.name}
-                  <span className={`badge bg-${statusColor(a.status)}`} style={{ pointerEvents: 'none' }}>
-                    {a.status.charAt(0).toUpperCase() + a.status.slice(1)}
-                  </span>
-                </h5>
-                <p className="card-text">Vet: {a.vetId?.name}</p>
-                <p className="card-text">Date: {new Date(a.date).toLocaleString()}</p>
-                {a.notes && <p className="card-text">Notes: {a.notes}</p>}
 
-                <div className="d-flex flex-wrap gap-2 mt-2">
-                  {role === 'owner' && a.status === 'pending' && (
-                    <button className="btn btn-outline-danger btn-sm" style={{ cursor: 'pointer' }} onClick={() => handleCancel(a._id)}>
-                      Cancel
-                    </button>
-                  )}
-                  {role === 'vet' && a.status === 'pending' && (
-                    <>
-                      <button className="btn btn-success btn-sm me-2" style={{ cursor: 'pointer' }} onClick={() => handleStatus(a._id, 'approved')}>Approve</button>
-                      <button className="btn btn-danger btn-sm" style={{ cursor: 'pointer' }} onClick={() => handleStatus(a._id, 'rejected')}>Reject</button>
-                    </>
-                  )}
+      {/* Appointments Grid */}
+      <div className="appointments-grid">
+        {filtered.length === 0 ? (
+          <div className="no-appointments">
+            <div className="no-appt-icon">📋</div>
+            <h3>No Appointments Found</h3>
+            <p>
+              {appointments.length === 0 
+                ? 'You don\'t have any appointments yet' 
+                : 'No appointments match your filters'}
+            </p>
+          </div>
+        ) : (
+          filtered.map(appt => (
+            <div key={appt._id} className="appointment-item">
+              <div className="appt-item-header">
+                <div className="appt-pet-info">
+                  <div className="pet-avatar-small">
+                    {appt.petId?.species === 'Kedi' || appt.petId?.species === 'kedi' || appt.petId?.species === 'Cat' || appt.petId?.species === 'cat' ? '🐱' : 
+                     appt.petId?.species === 'Köpek' || appt.petId?.species === 'köpek' || appt.petId?.species === 'Dog' || appt.petId?.species === 'dog' ? '🐶' : '🐾'}
+                  </div>
+                  <div>
+                    <h3>{appt.petId?.name || 'Pet'}</h3>
+                    <p className="pet-species">{appt.petId?.species}</p>
+                  </div>
                 </div>
+                <span className={`status-tag ${getStatusColor(appt.status)}`}>
+                  {getStatusText(appt.status)}
+                </span>
+              </div>
+
+              <div className="appt-item-body">
+                <div className="appt-info-row">
+                  <span className="info-icon">👨‍⚕️</span>
+                  <div className="info-content">
+                    <span className="info-label">Veterinarian</span>
+                    <span className="info-value">{appt.vetId?.name || 'Not specified'}</span>
+                  </div>
+                </div>
+
+                <div className="appt-info-row">
+                  <span className="info-icon">📅</span>
+                  <div className="info-content">
+                    <span className="info-label">Date & Time</span>
+                    <span className="info-value">
+                      {new Date(appt.date).toLocaleDateString('en-US', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </span>
+                  </div>
+                </div>
+
+                {appt.notes && (
+                  <div className="appt-notes-box">
+                    <span className="notes-icon">📝</span>
+                    <p>{appt.notes}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div className="appt-item-footer">
+                {role === 'owner' && appt.status === 'pending' && (
+                  <button 
+                    className="action-button cancel"
+                    onClick={() => handleCancel(appt._id)}
+                  >
+                    Cancel
+                  </button>
+                )}
+                {role === 'vet' && appt.status === 'pending' && (
+                  <>
+                    <button 
+                      className="action-button approve"
+                      onClick={() => handleStatus(appt._id, 'approved')}
+                    >
+                      ✓ Approve
+                    </button>
+                    <button 
+                      className="action-button reject"
+                      onClick={() => handleStatus(appt._id, 'rejected')}
+                    >
+                      ✗ Reject
+                    </button>
+                  </>
+                )}
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

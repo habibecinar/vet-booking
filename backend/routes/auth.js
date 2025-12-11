@@ -25,7 +25,11 @@ router.post('/login', async (req, res) => {
     if (!user) return res.status(404).json({ error: 'Kullanıcı bulunamadı' });
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ error: 'Şifre yanlış' });
-    const token = jwt.sign({ userId: user._id, role: user.role }, 'secretkey', { expiresIn: '1d' });
+    const token = jwt.sign(
+      { userId: user._id, role: user.role, id: user._id }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    );
     res.json({ token, user: { name: user.name, email: user.email, role: user.role } });
   } catch (err) {
     res.status(400).json({ error: err.message });
