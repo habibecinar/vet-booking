@@ -1,58 +1,135 @@
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDropzone } from 'react-dropzone';
 import './Home.css';
 
 function Home() {
   const navigate = useNavigate();
-  const [image, setImage] = useState(null);
 
-  const onDrop = useCallback((acceptedFiles) => {
-    const file = acceptedFiles[0];
-    setImage(Object.assign(file, {
-      preview: URL.createObjectURL(file)
-    }));
-  }, []);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      'image/*': []
-    },
-    maxFiles: 1
-  });  return (
-    <div className="home-main" style={{position: 'relative'}}>
-      <svg className="home-wave" viewBox="0 0 900 600" width="100%" height="100%" style={{position: 'absolute', top: 0, left: 0, zIndex: 1, pointerEvents: 'none'}}>
-        <path d="M448 600L449.5 566.7C451 533.3 454 466.7 480.3 400C506.7 333.3 556.3 266.7 543 200C529.7 133.3 453.3 66.7 415.2 33.3L377 0L900 0L900 33.3C900 66.7 900 133.3 900 200C900 266.7 900 333.3 900 400C900 466.7 900 533.3 900 566.7L900 600Z" fill="#1c3d58" strokeLinecap="round" strokeLinejoin="miter"></path>
+  return (
+    <div className="home-main">
+      {/* Animated Background Wave */}
+      <svg className="home-wave" viewBox="0 0 1440 320" preserveAspectRatio="none">
+        <path 
+          fill="#667eea" 
+          fillOpacity="0.3"
+          d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,149.3C960,160,1056,160,1152,138.7C1248,117,1344,75,1392,53.3L1440,32L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+        />
       </svg>
-      <div className="home-wave-blob-wrapper" style={{position: 'absolute', left: 20, bottom: 0, zIndex: 2, width: '420px', height: '320px', display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none'}}>
-        <svg className="home-wave-blob" width="100%" height="100%" viewBox="0 0 400 320" style={{position: 'absolute', top: 0, left: 0,  zIndex: 2, margin: 0, pointerEvents: 'none'}}>
-          <g transform="translate(200 160)">
-            <path d="M138.1 -87.5C154.3 -51.6 125.9 2.3 95.4 54.8C65 107.2 32.5 158.1 -16.2 167.5C-65 176.8 -129.9 144.7 -157.8 93.8C-185.6 42.8 -176.4 -26.8 -143.9 -72.1C-111.4 -117.3 -55.7 -138.2 2.6 -139.7C60.9 -141.2 121.8 -123.3 138.1 -87.5" fill="#1c3d58"></path>
-          </g>
-        </svg>
-        <div className="home-auth-blob" style={{position: 'absolute', top:0, left: 0 , width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '18px', pointerEvents: 'auto'}}>
-          <button className="btn btn-primary w-100" style={{padding: '12px 0', fontWeight: 600, fontSize: '1.1rem', borderRadius: '12px', width: '180px'}} onClick={() => navigate('/login')}>Login</button>
-          <button className="btn btn-outline-primary w-100" style={{padding: '12px 0', fontWeight: 600, fontSize: '1.1rem', borderRadius: '12px', borderWidth: 2, width: '180px'}} onClick={() => navigate('/register')}>Register</button>
+
+      <svg className="home-wave home-wave-2" viewBox="0 0 1440 320" preserveAspectRatio="none">
+        <path 
+          fill="#764ba2" 
+          fillOpacity="0.2"
+          d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,213.3C672,224,768,224,864,208C960,192,1056,160,1152,154.7C1248,149,1344,171,1392,181.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+        />
+      </svg>
+
+      {/* Hero Section */}
+      <div className="home-container">
+        <div className="home-hero">
+          <div className="home-hero-content">
+            <div className="home-logo">
+              <span className="logo-icon">🐾</span>
+              <span className="logo-text">VetBooking</span>
+            </div>
+            <h1 className="home-title">
+              Best Care for
+              <br />
+              <span className="gradient-text">Your Pet</span>
+            </h1>
+            <p className="home-description">
+              Manage your pet's health easily with our modern and secure veterinary appointment system
+            </p>
+
+            {/* Feature Pills */}
+            <div className="feature-pills">
+              <div className="pill">
+                <span className="pill-icon">⚡</span>
+                <span>Quick Booking</span>
+              </div>
+              <div className="pill">
+                <span className="pill-icon">🔒</span>
+                <span>Secure</span>
+              </div>
+              <div className="pill">
+                <span className="pill-icon">📱</span>
+                <span>Mobile Friendly</span>
+              </div>
+            </div>
+
+            {/* Auth Buttons */}
+            <div className="home-auth-buttons">
+              <button 
+                className="auth-btn primary" 
+                onClick={() => navigate('/login')}
+              >
+                <span className="btn-icon">🔐</span>
+                Login
+              </button>
+              <button 
+                className="auth-btn secondary" 
+                onClick={() => navigate('/register')}
+              >
+                <span className="btn-icon">✨</span>
+                Register
+              </button>
+            </div>
+          </div>
+
+          {/* Hero Image */}
+          <div className="home-hero-image">
+            <div className="image-wrapper">
+              <div className="image-glow"></div>
+              <img
+                src="/images/womanwithdog.png"
+                alt="Pet Care"
+                className="hero-img"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.parentElement.innerHTML = '<div class="placeholder-image"><span class="placeholder-icon">🐕</span><p>Veterinary & Pet Care</p></div>';
+                }}
+              />
+            </div>
+
+            {/* Floating Cards */}
+            <div className="floating-card card-1">
+              <div className="card-icon">📅</div>
+              <div className="card-content">
+                <h4>Easy Booking</h4>
+                <p>Fast and practical</p>
+              </div>
+            </div>
+
+            <div className="floating-card card-2">
+              <div className="card-icon">👨‍⚕️</div>
+              <div className="card-content">
+                <h4>Expert Vets</h4>
+                <p>Professional service</p>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-      <div className="home-hero" style={{position: 'relative', zIndex: 2}}>
-        <div className="home-hero-content">
-          <h1>Vet Booking</h1>
-          <h2>Easily plan the best care for your pet!</h2>
-          <p>A modern and secure veterinary appointment system</p>
-        </div>
-    
-          <div className="preview-img" style={{display:'flex',alignItems:'center',justifyContent:'center',marginTop:14,marginLeft:50}}>
-            <img
-              src={image ? image.preview : '/images/womanwithdog.png'}
-              alt="Pet Preview"
-              style={{ width: 320, height: 620, borderRadius: 16, objectFit: 'cover', boxShadow: '0 1px 4px 0 rgba(28,61,88,0.08)' }}
-            />
+
+        {/* Features Section */}
+        <div className="features-section">
+          <div className="feature-card">
+            <div className="feature-icon">🐾</div>
+            <h3>Pet Management</h3>
+            <p>Keep all your pet information in one place</p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon">📋</div>
+            <h3>Appointment Tracking</h3>
+            <p>Easily create and track your appointments</p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon">💊</div>
+            <h3>Health History</h3>
+            <p>Safely store veterinary records</p>
           </div>
         </div>
       </div>
-      
+    </div>
   );
 }
 

@@ -5,7 +5,6 @@ import axios from "axios";
 function AppointmentsDashboard() {
   const [appointments, setAppointments] = useState([]);
   const [role, setRole] = useState("");
-  const [userId, setUserId] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -14,29 +13,12 @@ function AppointmentsDashboard() {
 
     const decoded = JSON.parse(atob(token.split(".")[1]));
     setRole(decoded.role);
-    setUserId(decoded.userId);
 
     axios
       .get('/api/appointments', { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => setAppointments(res.data))
       .catch(() => setError("Failed to fetch appointments"));
   }, []);
-
-  const handleStatus = async (id, status) => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.put(
-        `http://localhost:5001/appointments/${id}/status`,
-        { status },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setAppointments((prev) =>
-        prev.map((a) => (a._id === id ? res.data : a))
-      );
-    } catch {
-      alert("Failed to update status");
-    }
-  };
 
   return (
     <div className="dashboard">

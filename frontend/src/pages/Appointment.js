@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 import './appointments.css';
 
 function Appointments() {
@@ -13,30 +14,25 @@ function Appointments() {
   useEffect(() => {
     fetchPets();
     fetchAppointments();
+    // eslint-disable-next-line
   }, []);
 
   const fetchPets = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const decoded = JSON.parse(atob(token.split('.')[1]));
-      const res = await axios.get(`/pets/owner/${decoded.userId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axios.get('/api/pets');
       setPets(res.data);
     } catch (err) {
+      console.error('Pet yükleme hatası:', err);
       setPets([]);
     }
   };
 
   const fetchAppointments = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const decoded = JSON.parse(atob(token.split('.')[1]));
-      const res = await axios.get(`/api/appointments`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axios.get('/api/appointments');
       setAppointments(res.data);
     } catch (err) {
+      console.error('Randevu yükleme hatası:', err);
       setAppointments([]);
     }
   };
@@ -44,14 +40,15 @@ function Appointments() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('token');
-      await axios.post('/appointments', { date, time, note, petId }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setDate(''); setTime(''); setNote(''); setPetId('');
+      await axios.post('/api/appointments', { date, time, note, petId });
+      setDate(''); 
+      setTime(''); 
+      setNote(''); 
+      setPetId('');
       fetchAppointments();
+      toast.success('📅 Randevu başarıyla oluşturuldu!');
     } catch (err) {
-      alert('Failed to create appointment');
+      toast.error(err.response?.data?.message || 'Randevu oluşturulamadı');
     }
   };
 
@@ -72,18 +69,23 @@ function Appointments() {
         </select>
 
         <label>Not:</label>
-        <textarea value={note} onChange={e => setNote(e.target.value)} />
+        <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="Randevu ile ilgili notlar..." />
 
         <button type="submit">Randevu Oluştur</button>
       </form>
 
       <h3>Randevularım</h3>
       <ul>
-        {appointments.map(a => (
-          <li key={a._id}>
-            {new Date(a.date).toLocaleDateString()} - {a.time} → <b>{a.status}</b>
-          </li>
-        ))}
+        {appointments.length === 0 ? (
+          <li>Henüz randevunuz yok</li>
+        ) : (
+          appointments.map(a => (
+            <li key={a._id}>
+              {new Date(a.date).toLocaleDateString()} - {a.time} → <b>{a.status}</b>
+              {a.note && <p style={{fontSize: 12, color: '#666'}}>Not: {a.note}</p>}
+            </li>
+          ))
+        )}
       </ul>
     </div>
   );
