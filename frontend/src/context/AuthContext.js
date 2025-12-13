@@ -10,10 +10,10 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (token) {
-      // Token'ı axios default header'a ekle
+      // Add token to axios default headers
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
-      // User bilgisini localStorage'dan al
+      // Get user info from localStorage
       const savedUser = localStorage.getItem('user');
       if (savedUser) {
         setUser(JSON.parse(savedUser));

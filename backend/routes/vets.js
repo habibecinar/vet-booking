@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 
-// Veterinerleri listeleme
+// List veterinarians
 router.get('/', async (req, res) => {
   try {
     const vets = await User.find({ role: 'vet' });
@@ -12,7 +12,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Veteriner ekleme (admin için örnek)
+// Add veterinarian (admin example)
 router.post('/', async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -23,7 +23,7 @@ router.post('/', async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 });
-// Belirli bir veterinere ait randevular
+// Get appointments for a specific veterinarian
 router.get('/vet/:vetId', async (req, res) => {
   try {
     const appointments = await Appointment.find({ vetId: req.params.vetId })
@@ -35,7 +35,7 @@ router.get('/vet/:vetId', async (req, res) => {
   }
 });
 
-// Belirli bir hayvan sahibine ait randevular
+// Get appointments for a specific pet owner
 router.get('/owner/:ownerId', async (req, res) => {
   try {
     const appointments = await Appointment.find({ ownerId: req.params.ownerId })

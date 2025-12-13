@@ -6,7 +6,6 @@ import './dashboard.css';
 
 function Dashboard() {
   const [role, setRole] = useState('');
-  const [userId, setUserId] = useState('');
   const [counts, setCounts] = useState({ pets: 0, appointments: 0, pending: 0, patients: 0 });
 
   useEffect(() => {
@@ -14,7 +13,6 @@ function Dashboard() {
     if (token) {
       const decoded = JSON.parse(atob(token.split('.')[1]));
       setRole(decoded.role);
-      setUserId(decoded.userId);
 
       if (decoded.role === 'owner') {
         Promise.all([
@@ -80,7 +78,7 @@ function Dashboard() {
               </div>
               <div className="col-12 mt-4">
                 <div className="card p-4">
-                  <h5>Hızlı Randevu Al</h5>
+                  <h5>Quick Appointment Booking</h5>
                   <QuickAppointmentForm />
                 </div>
               </div>

@@ -14,23 +14,23 @@ router.get('/test', authMiddleware, async (req, res) => {
   });
 });
 
-// Tüm petleri listeleme (admin için)
+// List all pets (for admin)
 router.get('/', authMiddleware, async (req, res) => {
   try {
     let filter = {};
-    // Eğer owner ise sadece kendine ait petleri göster
+    // If owner, show only their own pets
     if (req.user.role === 'owner') {
       filter.ownerId = req.user.id;
     }
     const pets = await Pet.find(filter).populate('ownerId', 'name email');
     res.json(pets);
   } catch (err) {
-    console.error('Pet listeleme hatası:', err);
+    console.error('Pet listing error:', err);
     res.status(400).json({ error: err.message });
   }
 });
 
-// Kullanıcının hayvanlarını listeleme
+// List user's pets
 router.get('/owner/:ownerId', authMiddleware, async (req, res) => {
   try {
     const pets = await Pet.find({ ownerId: req.params.ownerId });
@@ -40,17 +40,17 @@ router.get('/owner/:ownerId', authMiddleware, async (req, res) => {
   }
 });
 
-// Tek bir pet'i getirme
+// Get a single pet
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
     const pet = await Pet.findById(req.params.id).populate('ownerId', 'name email');
     if (!pet) {
-      return res.status(404).json({ error: 'Pet bulunamadı' });
+      return res.status(404).json({ error: 'Pet not found' });
     }
     
-    // Sadece owner kendi petini görebilir (admin hariç)
+    // Only owner can view their own pet (except admin)
     if (req.user.role === 'owner' && pet.ownerId._id.toString() !== req.user.id) {
-      return res.status(403).json({ error: 'Bu işlem için yetkiniz yok' });
+      return res.status(403).json({ error: 'You do not have permission for this action' });
     }
     
     res.json(pet);
@@ -59,25 +59,25 @@ router.get('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-// Evcil hayvan ekleme
+// Add a pet
 router.post('/', authMiddleware, async (req, res) => {
   try {
     const { name, species, age } = req.body;
     
     // Validation
     if (!name || !species || !age) {
-      return res.status(400).json({ error: 'Tüm alanlar zorunludur' });
+      return res.status(400).json({ error: 'All fields are required' });
     }
     
     if (age < 0 || age > 50) {
-      return res.status(400).json({ error: 'Geçerli bir yaş giriniz (0-50)' });
+      return res.status(400).json({ error: 'Please enter a valid age (0-50)' });
     }
     
     const pet = new Pet({ 
       name, 
       species, 
       age, 
-      ownerId: req.user.id // Token'dan alınan kullanıcı ID'si
+      ownerId: req.user.id // User ID from token
     });
     
     await pet.save();
@@ -87,27 +87,27 @@ router.post('/', authMiddleware, async (req, res) => {
   }
 });
 
-// Evcil hayvan güncelleme
+// Update a pet
 router.put('/:id', authMiddleware, async (req, res) => {
   try {
     const { name, species, age } = req.body;
     
     const pet = await Pet.findById(req.params.id);
     if (!pet) {
-      return res.status(404).json({ error: 'Pet bulunamadı' });
+      return res.status(404).json({ error: 'Pet not found' });
     }
     
-    // Sadece owner kendi petini güncelleyebilir
+    // Only owner can update their own pet
     if (req.user.role === 'owner' && pet.ownerId.toString() !== req.user.id) {
-      return res.status(403).json({ error: 'Bu işlem için yetkiniz yok' });
+      return res.status(403).json({ error: 'You do not have permission for this action' });
     }
     
     // Validation
     if (age && (age < 0 || age > 50)) {
-      return res.status(400).json({ error: 'Geçerli bir yaş giriniz (0-50)' });
+      return res.status(400).json({ error: 'Please enter a valid age (0-50)' });
     }
     
-    // Güncelleme
+    // Update
     if (name) pet.name = name;
     if (species) pet.species = species;
     if (age) pet.age = age;
@@ -119,21 +119,21 @@ router.put('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-// Evcil hayvan silme
+// Delete a pet
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const pet = await Pet.findById(req.params.id);
     if (!pet) {
-      return res.status(404).json({ error: 'Pet bulunamadı' });
+      return res.status(404).json({ error: 'Pet not found' });
     }
     
-    // Sadece owner kendi petini silebilir (admin da silebilir)
+    // Only owner can delete their own pet (admin can also delete)
     if (req.user.role === 'owner' && pet.ownerId.toString() !== req.user.id) {
-      return res.status(403).json({ error: 'Bu işlem için yetkiniz yok' });
+      return res.status(403).json({ error: 'You do not have permission for this action' });
     }
     
     await Pet.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Pet başarıyla silindi' });
+    res.json({ message: 'Pet deleted successfully' });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

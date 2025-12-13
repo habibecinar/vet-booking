@@ -3,7 +3,7 @@ const router = express.Router();
 const Appointment = require('../models/Appointment');
 const authMiddleware = require('../middleware/authMiddleware');
 
-// 1️⃣ Randevu oluştur (Owner)
+// Create appointment (Owner)
 router.post('/', authMiddleware, async (req, res) => {
   try {
     const { date, time, note, petId } = req.body;
@@ -20,11 +20,11 @@ router.post('/', authMiddleware, async (req, res) => {
     res.status(201).json(appointment);
   } catch (error) {
     console.error('Appointment creation error:', error);
-    res.status(500).json({ message: 'Randevu oluşturulamadı' });
+    res.status(500).json({ message: 'Failed to create appointment' });
   }
 });
 
-// 2️⃣ Randevuları getir (Admin veya Owner)
+// Get appointments (Admin or Owner)
 router.get('/', authMiddleware, async (req, res) => {
   try {
     let filter = {};
@@ -40,11 +40,11 @@ router.get('/', authMiddleware, async (req, res) => {
     res.json(appointments);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Randevular getirilemedi' });
+    res.status(500).json({ message: 'Failed to fetch appointments' });
   }
 });
 
-// 3️⃣ Admin onay / iptal / tamamlama işlemleri
+// Admin approve / cancel / complete operations
 router.patch('/:id', authMiddleware, async (req, res) => {
   try {
     const { status } = req.body;
@@ -58,7 +58,7 @@ router.patch('/:id', authMiddleware, async (req, res) => {
     res.json(updated);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Randevu güncellenemedi' });
+    res.status(500).json({ message: 'Failed to update appointment' });
   }
 });
 

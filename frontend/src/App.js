@@ -9,12 +9,13 @@ import Register from './pages/Register';
 import Home from './pages/Home';
 import UserPanel from './pages/UserPanel';
 import AdminPanel from './pages/AdminPanel';
-import AppointmentsDashboard from './pages/AppointmentsDashboard';
+import Dashboard from './pages/Dashboard';
 import PetsPage from './pages/PetsPage';
 import VetsPage from './pages/VetsPage';
 import AppointmentsPage from './pages/AppointmentsPage';
 import DashboardLayout from './layouts/DashboardLayout';
 import AdminAppointments from './pages/AdminAppointments';
+import VetPanel from './pages/VetPanel';
 
 function App() {
   return (
@@ -32,7 +33,7 @@ function App() {
               <DashboardLayout />
             </ProtectedRoute>
           }>
-            <Route path="/dashboard" element={<AppointmentsDashboard />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/pets" element={<PetsPage />} />
             <Route path="/vets" element={<VetsPage />} />
             <Route path="/appointments" element={<AppointmentsPage />} />
@@ -44,12 +45,17 @@ function App() {
           </Route>
 
           {/* 🧩 Diğer özel paneller - Protected */}
-          <Route path="/panel" element={
-            <ProtectedRoute>
+          <Route path="/user-panel" element={
+            <ProtectedRoute allowedRoles={['owner']}>
               <UserPanel />
             </ProtectedRoute>
           } />
-          <Route path="/admin" element={
+          <Route path="/vet-panel" element={
+            <ProtectedRoute allowedRoles={['vet']}>
+              <VetPanel />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin-panel" element={
             <ProtectedRoute allowedRoles={['admin']}>
               <AdminPanel />
             </ProtectedRoute>
