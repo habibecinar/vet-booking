@@ -8,7 +8,7 @@ import reportWebVitals from './reportWebVitals';
 // Axios global configuration
 axios.defaults.baseURL = 'http://localhost:5001';
 
-// Axios interceptor - her istekte token ekle
+// Axios interceptor - add token to every request
 axios.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -22,7 +22,7 @@ axios.interceptors.request.use(
   }
 );
 
-// Axios response interceptor - 401 hatalarını yakala
+// Axios response interceptor - catch 401 errors
 axios.interceptors.response.use(
   (response) => response,
   (error) => {

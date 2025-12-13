@@ -22,7 +22,7 @@ function Appointments() {
       const res = await axios.get('/api/pets');
       setPets(res.data);
     } catch (err) {
-      console.error('Pet yükleme hatası:', err);
+      console.error('Pet loading error:', err);
       setPets([]);
     }
   };
@@ -32,7 +32,7 @@ function Appointments() {
       const res = await axios.get('/api/appointments');
       setAppointments(res.data);
     } catch (err) {
-      console.error('Randevu yükleme hatası:', err);
+      console.error('Appointment loading error:', err);
       setAppointments([]);
     }
   };
@@ -46,43 +46,43 @@ function Appointments() {
       setNote(''); 
       setPetId('');
       fetchAppointments();
-      toast.success('📅 Randevu başarıyla oluşturuldu!');
+      toast.success('📅 Appointment created successfully!');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Randevu oluşturulamadı');
+      toast.error(err.response?.data?.message || 'Failed to create appointment');
     }
   };
 
   return (
     <div className="page">
-      <h2>Randevu Al</h2>
+      <h2>Book Appointment</h2>
       <form onSubmit={handleSubmit}>
-        <label>Tarih:</label>
+        <label>Date:</label>
         <input type="date" value={date} onChange={e => setDate(e.target.value)} required />
 
-        <label>Saat:</label>
+        <label>Time:</label>
         <input type="time" value={time} onChange={e => setTime(e.target.value)} required />
 
-        <label>Evcil Hayvan:</label>
+        <label>Pet:</label>
         <select value={petId} onChange={e => setPetId(e.target.value)} required>
-          <option value="">Seçiniz</option>
+          <option value="">Select</option>
           {pets.map(p => <option key={p._id} value={p._id}>{p.name}</option>)}
         </select>
 
-        <label>Not:</label>
-        <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="Randevu ile ilgili notlar..." />
+        <label>Note:</label>
+        <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="Notes about the appointment..." />
 
-        <button type="submit">Randevu Oluştur</button>
+        <button type="submit">Create Appointment</button>
       </form>
 
-      <h3>Randevularım</h3>
+      <h3>My Appointments</h3>
       <ul>
         {appointments.length === 0 ? (
-          <li>Henüz randevunuz yok</li>
+          <li>No appointments yet</li>
         ) : (
           appointments.map(a => (
             <li key={a._id}>
               {new Date(a.date).toLocaleDateString()} - {a.time} → <b>{a.status}</b>
-              {a.note && <p style={{fontSize: 12, color: '#666'}}>Not: {a.note}</p>}
+              {a.note && <p style={{fontSize: 12, color: '#666'}}>Note: {a.note}</p>}
             </li>
           ))
         )}

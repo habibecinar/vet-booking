@@ -41,7 +41,7 @@ function Sidebar({ active, role }) {
             display: 'inline-block',
             marginTop: 4
           }}>
-            {user.role === 'owner' ? 'Kullanıcı' : user.role === 'vet' ? 'Veteriner' : 'Admin'}
+            {user.role === 'owner' ? 'Pet Owner' : user.role === 'vet' ? 'Veterinarian' : 'Admin'}
           </div>
         </div>
       )}
