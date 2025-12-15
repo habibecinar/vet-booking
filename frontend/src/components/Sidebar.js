@@ -83,7 +83,7 @@ function Sidebar({ active, role }) {
         )}
       </div>
 
-      {/* Logout Butonu */}
+      {/* Logout Button */}
       <div style={{ 
         position: 'absolute', 
         bottom: 20, 
@@ -92,24 +92,9 @@ function Sidebar({ active, role }) {
       }}>
         <button 
           onClick={handleLogout}
-          className="menu-item"
-          style={{ 
-            width: '100%', 
-            background: '#dc3545',
-            color: 'white',
-            border: 'none',
-            borderRadius: 8,
-            padding: '10px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'all 0.2s'
-          }}
-          onMouseOver={(e) => e.target.style.background = '#c82333'}
-          onMouseOut={(e) => e.target.style.background = '#dc3545'}
+          className="logout-button"
         >
-          <FaSignOutAlt style={{ marginRight: 8 }} /> Çıkış Yap
+          <FaSignOutAlt style={{ marginRight: 8 }} /> Logout
         </button>
       </div>
     </div>
