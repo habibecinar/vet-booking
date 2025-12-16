@@ -84,12 +84,7 @@ function Sidebar({ active, role }) {
       </div>
 
       {/* Logout Button */}
-      <div style={{ 
-        position: 'absolute', 
-        bottom: 20, 
-        left: 20, 
-        right: 20 
-      }}>
+      <div className="logout-wrapper">
         <button 
           onClick={handleLogout}
           className="logout-button"
