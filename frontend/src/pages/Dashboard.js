@@ -1,8 +1,99 @@
 import React, { useEffect, useState } from 'react';
-// ... QuickAppointmentForm fonksiyonu sadece dosya başında tanımlı kalacak ...
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import './dashboard.css';
+
+// Quick appointment form component (defined before Dashboard)
+function QuickAppointmentForm() {
+  const [date, setDate] = useState('');
+  const [time, setTime] = useState('');
+  const [note, setNote] = useState('');
+  const [pets, setPets] = useState([]);
+  const [petId, setPetId] = useState('');
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    const decoded = JSON.parse(atob(token.split('.')[1]));
+    axios.get(`http://localhost:5001/pets/owner/${decoded.userId}`, { 
+      headers: { Authorization: `Bearer ${token}` } 
+    })
+      .then(res => setPets(res.data))
+      .catch(() => setPets([]));
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(''); 
+    setSuccess('');
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post('http://localhost:5001/appointments', 
+        { date, time, note, petId }, 
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setSuccess('Appointment created successfully!');
+      setDate(''); 
+      setTime(''); 
+      setNote(''); 
+      setPetId('');
+    } catch (err) {
+      setError('Failed to create appointment');
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="row g-2 align-items-end">
+      <div className="col-md-3">
+        <label className="form-label">Date</label>
+        <input 
+          type="date" 
+          className="form-control" 
+          value={date} 
+          onChange={e => setDate(e.target.value)} 
+          required 
+        />
+      </div>
+      <div className="col-md-2">
+        <label className="form-label">Time</label>
+        <input 
+          type="time" 
+          className="form-control" 
+          value={time} 
+          onChange={e => setTime(e.target.value)} 
+          required 
+        />
+      </div>
+      <div className="col-md-3">
+        <label className="form-label">Pet</label>
+        <select 
+          className="form-select" 
+          value={petId} 
+          onChange={e => setPetId(e.target.value)} 
+          required
+        >
+          <option value="">Select Pet</option>
+          {pets.map(p => <option key={p._id} value={p._id}>{p.name}</option>)}
+        </select>
+      </div>
+      <div className="col-md-3">
+        <label className="form-label">Notes</label>
+        <input 
+          className="form-control" 
+          value={note} 
+          onChange={e => setNote(e.target.value)} 
+        />
+      </div>
+      <div className="col-md-1">
+        <button className="btn btn-primary w-100" type="submit">Create</button>
+      </div>
+      {success && <div className="col-12 text-success mt-2">{success}</div>}
+      {error && <div className="col-12 text-danger mt-2">{error}</div>}
+    </form>
+  );
+}
 
 function Dashboard() {
   const [role, setRole] = useState('');
@@ -16,8 +107,12 @@ function Dashboard() {
 
       if (decoded.role === 'owner') {
         Promise.all([
-          axios.get(`/pets/owner/${decoded.userId}`, { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get(`/api/appointments`, { headers: { Authorization: `Bearer ${token}` } })
+          axios.get(`http://localhost:5001/pets/owner/${decoded.userId}`, { 
+            headers: { Authorization: `Bearer ${token}` } 
+          }),
+          axios.get(`http://localhost:5001/appointments`, { 
+            headers: { Authorization: `Bearer ${token}` } 
+          })
         ]).then(([petsRes, appRes]) => {
           setCounts({
             pets: petsRes.data.length,
@@ -25,9 +120,13 @@ function Dashboard() {
             pending: appRes.data.filter(a => a.status === 'pending').length,
             patients: 0
           });
+        }).catch(err => {
+          console.error('Error fetching dashboard data:', err);
         });
       } else if (decoded.role === 'vet') {
-        axios.get(`/api/appointments`, { headers: { Authorization: `Bearer ${token}` } })
+        axios.get(`http://localhost:5001/appointments`, { 
+          headers: { Authorization: `Bearer ${token}` } 
+        })
           .then(res => {
             setCounts({
               pets: 0,
@@ -35,17 +134,21 @@ function Dashboard() {
               pending: res.data.filter(a => a.status === 'pending').length,
               patients: [...new Set(res.data.map(a => a.petId?._id))].length
             });
+          })
+          .catch(err => {
+            console.error('Error fetching appointments:', err);
           });
       }
     }
   }, []);
 
   return (
-    <div className="dashboard">
-      <div className="dashboard-content">
-        <h2>{role === 'vet' ? 'Veterinarian Dashboard' : 'My Dashboard'}</h2>
+    <div>
+      <h2 style={{ marginBottom: '24px' }}>
+        {role === 'vet' ? 'Veterinarian Dashboard' : 'My Dashboard'}
+      </h2>
 
-        <div className="row mb-4">
+      <div className="row mb-4">
           {role === 'owner' && (
             <>
               <div className="col-md-3 mb-3">
@@ -118,75 +221,7 @@ function Dashboard() {
             </>
           )}
         </div>
-      </div>
     </div>
-  );
-}
-
-
-
-
-// Hızlı randevu formu bileşeni
-function QuickAppointmentForm() {
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
-  const [note, setNote] = useState('');
-  const [pets, setPets] = useState([]);
-  const [petId, setPetId] = useState('');
-  const [success, setSuccess] = useState('');
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-    const decoded = JSON.parse(atob(token.split('.')[1]));
-    axios.get(`/pets/owner/${decoded.userId}`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(res => setPets(res.data))
-      .catch(() => setPets([]));
-  }, []);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(''); setSuccess('');
-    try {
-      const token = localStorage.getItem('token');
-      await axios.post('/api/appointments', { date, time, note, petId }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setSuccess('Randevu oluşturuldu!');
-      setDate(''); setTime(''); setNote(''); setPetId('');
-    } catch (err) {
-      setError('Randevu oluşturulamadı');
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="row g-2 align-items-end">
-      <div className="col-md-3">
-        <label className="form-label">Tarih</label>
-        <input type="date" className="form-control" value={date} onChange={e => setDate(e.target.value)} required />
-      </div>
-      <div className="col-md-2">
-        <label className="form-label">Saat</label>
-        <input type="time" className="form-control" value={time} onChange={e => setTime(e.target.value)} required />
-      </div>
-      <div className="col-md-3">
-        <label className="form-label">Evcil Hayvan</label>
-        <select className="form-select" value={petId} onChange={e => setPetId(e.target.value)} required>
-          <option value="">Seçiniz</option>
-          {pets.map(p => <option key={p._id} value={p._id}>{p.name}</option>)}
-        </select>
-      </div>
-      <div className="col-md-3">
-        <label className="form-label">Not</label>
-        <input className="form-control" value={note} onChange={e => setNote(e.target.value)} />
-      </div>
-      <div className="col-md-1">
-        <button className="btn btn-primary w-100" type="submit">Oluştur</button>
-      </div>
-      {success && <div className="col-12 text-success mt-2">{success}</div>}
-      {error && <div className="col-12 text-danger mt-2">{error}</div>}
-    </form>
   );
 }
 
