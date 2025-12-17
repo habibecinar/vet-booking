@@ -23,23 +23,27 @@ function Sidebar({ active, role }) {
         </div>
       </div>
 
-      {/* Kullanıcı Bilgisi */}
+      {/* User Info */}
       {user && (
         <div style={{ 
-          padding: '12px 20px', 
-          borderBottom: '1px solid #e0e0e0',
-          background: '#f8f9fa'
+          padding: '16px 24px', 
+          borderBottom: '1px solid #f0f0f0',
+          background: '#fafbfc'
         }}>
-          <div style={{ fontSize: 14, fontWeight: 600, color: '#333' }}>{user.name}</div>
-          <div style={{ fontSize: 12, color: '#666' }}>{user.email}</div>
+          <div style={{ fontSize: '0.95rem', fontWeight: 600, color: '#222', marginBottom: '4px' }}>
+            {user.name}
+          </div>
+          <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '8px' }}>
+            {user.email}
+          </div>
           <div style={{ 
-            fontSize: 11, 
+            fontSize: '0.75rem', 
             color: '#fff', 
-            background: '#007bff', 
-            padding: '2px 8px', 
-            borderRadius: 12, 
+            background: 'linear-gradient(135deg, #2d6cdf 0%, #5fa8e6 100%)', 
+            padding: '4px 10px', 
+            borderRadius: 14, 
             display: 'inline-block',
-            marginTop: 4
+            fontWeight: 500
           }}>
             {user.role === 'owner' ? 'Pet Owner' : user.role === 'vet' ? 'Veterinarian' : 'Admin'}
           </div>
